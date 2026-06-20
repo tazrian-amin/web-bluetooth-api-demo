@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Swan BLE Analytics Hub</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="style.css" />
+    <!-- Load Chart.js Library via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div class="card">
+      <h1>PWA Prototype</h1>
+
+      <button id="connectBtn" class="btn" onclick="connectBLE()">
+        Connect to Device
+      </button>
+      <button
+        id="disconnectBtn"
+        class="btn btn-disconnect"
+        onclick="disconnectBLE()"
+      >
+        Disconnect
+      </button>
+
+      <div class="sensor-container">
+        <div class="label">Raw ADC Value</div>
+        <div id="valueDisplay" class="value">--.--</div>
+      </div>
+
+      <!-- Real-Time Time Series Data Chart Window -->
+      <div class="chart-container">
+        <canvas id="telemetryChart" width="400" height="200"></canvas>
+      </div>
+
+      <div id="status">Status: Disconnected</div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "short_name": "SwanTelemetry",
+  "name": "Swan R5 BLE Sensor Dashboard",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#f0f2f5",
+  "theme_color": "#007bff",
+  "display": "standalone",
+  "orientation": "portrait"
+}
