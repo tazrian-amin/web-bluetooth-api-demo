@@ -1,4 +1,4 @@
-const CACHE_NAME = "swan-ble-cache-v3";
+const CACHE_NAME = "swan-ble-cache-v4";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -6,6 +6,7 @@ const ASSETS_TO_CACHE = [
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
+  "./favicon.ico",
 ];
 
 // Install Event: Cache all core UI assets
