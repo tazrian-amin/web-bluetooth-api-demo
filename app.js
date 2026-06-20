@@ -10,7 +10,6 @@ const connectBtn = document.getElementById("connectBtn");
 const disconnectBtn = document.getElementById("disconnectBtn");
 const valueDisplay = document.getElementById("valueDisplay");
 const statusText = document.getElementById("status");
-const controlPanel = document.getElementById("controlPanel");
 
 // Initialize the Chart.js Instance on Document Load
 window.addEventListener("DOMContentLoaded", () => {
@@ -83,7 +82,6 @@ async function connectBLE() {
     statusText.innerText = "Status: Connected!";
     connectBtn.style.display = "none";
     disconnectBtn.style.display = "block";
-    controlPanel.style.display = "block";
   } catch (error) {
     console.error("BLE Error: ", error);
     statusText.innerText = `Error: ${error.message}`;
@@ -150,18 +148,6 @@ function updateChartData(newValue) {
   myChart.update(); // Trigger visualization rerender execution
 }
 
-async function sendHardwareCommand(commandValue) {
-  if (!rxCharacteristic) return;
-  try {
-    const dataBuffer = Uint8Array.of(commandValue);
-    await rxCharacteristic.writeValue(dataBuffer);
-    console.log(`Command Out -> 0x0${commandValue}`);
-  } catch (error) {
-    console.error("Transmission failed:", error);
-    statusText.innerText = `Write Error: ${error.message}`;
-  }
-}
-
 function disconnectBLE() {
   if (bleDevice && bleDevice.gatt.connected) {
     bleDevice.gatt.disconnect();
@@ -173,7 +159,6 @@ function onDisconnected() {
   valueDisplay.innerText = "--.--";
   connectBtn.style.display = "block";
   disconnectBtn.style.display = "none";
-  controlPanel.style.display = "none";
   byteBuffer = [];
 }
 
