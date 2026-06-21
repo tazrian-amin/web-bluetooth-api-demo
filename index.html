@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PWA Prototype</title>
+    <title>MS Connect</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link rel="stylesheet" href="style.css" />
@@ -12,7 +12,7 @@
   </head>
   <body>
     <div class="card">
-      <h1>PWA Prototype</h1>
+      <h1>MS Connect</h1>
 
       <button id="connectBtn" class="btn" onclick="connectBLE()">
         Connect to Device
@@ -31,8 +31,10 @@
       </div>
 
       <!-- Real-Time Time Series Data Chart Window -->
-      <div class="chart-container">
-        <canvas id="telemetryChart" width="400" height="200"></canvas>
+      <div class="chart-container" id="chartScroll">
+        <div class="chart-inner" id="chartInner">
+          <canvas id="telemetryChart"></canvas>
+        </div>
       </div>
 
       <div id="status">Status: Disconnected</div>

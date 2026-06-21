@@ -73,6 +73,11 @@ h1 {
   padding: 10px;
   border-radius: 12px;
   border: 1px solid #e3e6ea;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.chart-inner {
+  height: 200px;
 }
 #status {
   font-size: 13px;

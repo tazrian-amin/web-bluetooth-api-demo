@@ -6,10 +6,15 @@ let rxCharacteristic = null;
 let byteBuffer = [];
 let myChart = null; // Global Chart Instance
 
+const PIXELS_PER_POINT = 50; // Horizontal spacing per point so the trace never looks congested
+const MAX_POINTS = 1000; // Safety cap on retained history to bound memory over long sessions
+
 const connectBtn = document.getElementById("connectBtn");
 const disconnectBtn = document.getElementById("disconnectBtn");
 const valueDisplay = document.getElementById("valueDisplay");
 const statusText = document.getElementById("status");
+const chartScroll = document.getElementById("chartScroll");
+const chartInner = document.getElementById("chartInner");
 
 // Initialize the Chart.js Instance on Document Load
 window.addEventListener("DOMContentLoaded", () => {
@@ -38,12 +43,17 @@ window.addEventListener("DOMContentLoaded", () => {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       scales: {
         x: { grid: { display: false } },
         y: { beginAtZero: false },
       },
     },
   });
+
+  chartInner.style.width = `${chartScroll.clientWidth}px`;
+  window.addEventListener("resize", resizeChartWidth);
+
   console.log("Chart.js initialized");
 });
 
@@ -126,7 +136,7 @@ function handleIncomingBytes(event) {
   }
 }
 
-// Push data and manage rolling array size bounds
+// Push data, grow the chart horizontally, and keep the latest point in view
 function updateChartData(newValue) {
   if (!myChart) return;
 
@@ -136,16 +146,37 @@ function updateChartData(newValue) {
     second: "2-digit",
   });
 
+  const wasNearEnd = isScrolledNearEnd();
+
   myChart.data.labels.push(currentTimeString);
   myChart.data.datasets[0].data.push(newValue);
 
-  // Maintain max bounds of 15 trace points to preserve memory integrity
-  if (myChart.data.labels.length > 15) {
+  // Maintain max bounds to preserve memory integrity over long sessions
+  if (myChart.data.labels.length > MAX_POINTS) {
     myChart.data.labels.shift();
     myChart.data.datasets[0].data.shift();
   }
 
+  resizeChartWidth();
   myChart.update(); // Trigger visualization rerender execution
+
+  if (wasNearEnd) {
+    chartScroll.scrollLeft = chartScroll.scrollWidth;
+  }
+}
+
+// Grow the chart's inner width with the point count so spacing stays constant
+function resizeChartWidth() {
+  const pointCount = myChart.data.labels.length;
+  const neededWidth = pointCount * PIXELS_PER_POINT;
+  chartInner.style.width = `${Math.max(chartScroll.clientWidth, neededWidth)}px`;
+}
+
+// True if the user is viewing (or near) the latest data, so it's safe to auto-scroll
+function isScrolledNearEnd() {
+  const distanceFromEnd =
+    chartScroll.scrollWidth - chartScroll.scrollLeft - chartScroll.clientWidth;
+  return distanceFromEnd < PIXELS_PER_POINT * 2;
 }
 
 function disconnectBLE() {

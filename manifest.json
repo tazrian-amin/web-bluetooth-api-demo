@@ -1,14 +1,14 @@
 {
-  "short_name": "SwanTelemetry",
-  "name": "Swan R5 BLE Sensor Dashboard",
+  "short_name": "MS Connect",
+  "name": "Mining Sentry Connect",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "ms-icon.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "icon-512.png",
+      "src": "ms-logo.png",
       "type": "image/png",
       "sizes": "512x512"
     }

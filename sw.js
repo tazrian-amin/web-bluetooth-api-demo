@@ -1,11 +1,11 @@
-const CACHE_NAME = "swan-ble-cache-v4";
+const CACHE_NAME = "ms-connect-v4";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
   "./app.js",
   "./manifest.json",
-  "./icon-192.png",
-  "./icon-512.png",
+  "./ms-icon.png",
+  "./ms-logo.png",
   "./favicon.ico",
 ];
 
@@ -13,7 +13,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log("PWA Service Worker: Caching core assets (v2)");
+      console.log("PWA Service Worker: Caching core assets (v4)");
       return cache.addAll(ASSETS_TO_CACHE);
     }),
   );
