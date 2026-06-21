@@ -30,6 +30,25 @@
         <div id="valueDisplay" class="value">--.--</div>
       </div>
 
+      <!-- Bidirectional control: push a new sample period to the firmware over BLE -->
+      <div id="controlPanel" class="control-container">
+        <div class="label">Sample Period (seconds)</div>
+        <div class="period-control">
+          <input
+            type="number"
+            id="periodInput"
+            min="1"
+            max="86400"
+            step="1"
+            placeholder="60"
+          />
+          <button id="setPeriodBtn" class="btn" onclick="setSamplePeriod()">
+            Set Period
+          </button>
+        </div>
+        <div id="periodStatus" class="period-status"></div>
+      </div>
+
       <!-- Real-Time Time Series Data Chart Window -->
       <div class="chart-container" id="chartScroll">
         <div class="chart-inner" id="chartInner">

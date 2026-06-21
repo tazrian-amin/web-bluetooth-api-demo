@@ -67,6 +67,38 @@ h1 {
   color: #28a745;
   margin-top: 5px;
 }
+.control-container {
+  margin: 20px 0;
+  background: #e9ecef;
+  padding: 15px;
+  border-radius: 12px;
+  display: none;
+}
+.period-control {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.period-control input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+.period-control .btn {
+  width: auto;
+  flex-shrink: 0;
+}
+.period-status {
+  font-size: 13px;
+  color: #6c757d;
+  margin-top: 8px;
+  min-height: 16px;
+  word-wrap: break-word;
+}
 .chart-container {
   margin: 20px 0;
   background: #fafafa;
