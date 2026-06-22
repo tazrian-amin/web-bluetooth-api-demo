@@ -73,9 +73,12 @@ async function connectBLE() {
       return;
     }
 
-    statusText.innerText = "Status: Searching for HM-10...";
+    statusText.innerText = "Status: Searching for devices...";
     bleDevice = await navigator.bluetooth.requestDevice({
-      filters: [{ services: [HM10_SERVICE_UUID] }],
+      acceptAllDevices: true,
+      // Without this, GATT access is blocked for services not named in filters/optionalServices,
+      // even though the chooser now lists every nearby device, not just HM-10s.
+      optionalServices: [HM10_SERVICE_UUID],
     });
 
     statusText.innerText = "Status: Connecting to GATT Server...";
