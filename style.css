@@ -74,10 +74,50 @@ h1 {
   border-radius: 12px;
   display: none;
 }
-.period-control {
+.period-control,
+.command-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 8px;
+  align-items: center;
+}
+.command-row input,
+.period-control input {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+.command-row button,
+.period-control .btn {
+  width: auto;
+  flex-shrink: 0;
+}
+.btn-secondary {
+  background: #6c757d;
+}
+.btn-secondary:hover {
+  background: #5a6268;
+}
+.log-section {
+  margin: 20px 0;
+  background: #e9ecef;
+  padding: 15px;
+  border-radius: 12px;
+}
+.log-box,
+.json-viewer {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 8px;
+  min-height: 80px;
+  max-height: 200px;
+  overflow: auto;
+  text-align: left;
+  white-space: pre-wrap;
+  font-size: 13px;
+  color: #212529;
 }
 .period-control input {
   flex: 1;
