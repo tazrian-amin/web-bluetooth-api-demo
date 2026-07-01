@@ -53,14 +53,9 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
-// Allow the page to trigger the waiting service worker to take over immediately,
-// and to ask the active worker which version it's serving.
+// Allow the page to trigger the waiting service worker to take over immediately.
 self.addEventListener("message", (event) => {
-  if (!event.data) return;
-
-  if (event.data.type === "SKIP_WAITING") {
+  if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
-  } else if (event.data.type === "GET_VERSION") {
-    event.source.postMessage({ type: "VERSION", version: CACHE_VERSION });
   }
 });

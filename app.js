@@ -1,12 +1,16 @@
 const HM10_SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
 const HM10_CHARACTERISTIC_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
 
+// Bump alongside CACHE_VERSION in sw.js on every release.
+const APP_VERSION = "v6";
+
 let bleDevice = null;
 let rxCharacteristic = null;
 let byteBuffer = [];
 let myChart = null; // Global Chart Instance
 let serviceWorkerRegistration = null;
 let isRefreshing = false;
+let updateRequested = false;
 
 const PIXELS_PER_POINT = 50; // Horizontal spacing per point so the trace never looks congested
 const MAX_POINTS = 1000; // Safety cap on retained history to bound memory over long sessions
@@ -87,12 +91,19 @@ function hideUpdateBanner() {
 }
 
 function initServiceWorkerUpdates() {
+  if (appVersionText) {
+    appVersionText.textContent = APP_VERSION;
+  }
+
   if (!("serviceWorker" in navigator)) {
     return;
   }
 
+  // Only reload in response to a controller change we ourselves triggered by
+  // clicking "Update Now" — a bare "clients.claim()" (e.g. on first install)
+  // also fires "controllerchange" and would otherwise cause an unwanted reload.
   navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (isRefreshing) return;
+    if (!updateRequested || isRefreshing) return;
     isRefreshing = true;
     window.location.reload();
   });
@@ -124,8 +135,6 @@ function initServiceWorkerUpdates() {
       registration.update().catch((error) => {
         console.warn("Service worker update check failed:", error);
       });
-
-      requestAppVersion();
     })
     .catch((error) => {
       console.error("PWA Service Worker failed:", error);
@@ -138,6 +147,7 @@ function initServiceWorkerUpdates() {
         return;
       }
 
+      updateRequested = true;
       updateButton.disabled = true;
       showUpdateBanner("Applying update...");
       serviceWorkerRegistration.waiting.postMessage({ type: "SKIP_WAITING" });
@@ -154,19 +164,6 @@ function initServiceWorkerUpdates() {
       }, 3000);
     });
   }
-
-  navigator.serviceWorker.addEventListener("message", (event) => {
-    if (event.data && event.data.type === "VERSION" && appVersionText) {
-      appVersionText.textContent = event.data.version;
-    }
-  });
-}
-
-function requestAppVersion() {
-  if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller) {
-    return;
-  }
-  navigator.serviceWorker.controller.postMessage({ type: "GET_VERSION" });
 }
 
 window.addEventListener("load", initServiceWorkerUpdates);
