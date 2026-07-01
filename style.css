@@ -157,3 +157,47 @@ h1 {
   margin-top: 15px;
   word-wrap: break-word;
 }
+
+.update-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1f2937;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  max-width: min(90vw, 420px);
+}
+
+.update-toast__message {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn-small {
+  width: auto;
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 999px;
+}
+
+@media (max-width: 480px) {
+  .update-toast {
+    flex-direction: column;
+    align-items: stretch;
+    border-radius: 16px;
+    width: calc(100vw - 24px);
+    max-width: none;
+    bottom: 12px;
+  }
+
+  .btn-small {
+    width: 100%;
+  }
+}

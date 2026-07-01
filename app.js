@@ -5,6 +5,8 @@ let bleDevice = null;
 let rxCharacteristic = null;
 let byteBuffer = [];
 let myChart = null; // Global Chart Instance
+let serviceWorkerRegistration = null;
+let isRefreshing = false;
 
 const PIXELS_PER_POINT = 50; // Horizontal spacing per point so the trace never looks congested
 const MAX_POINTS = 1000; // Safety cap on retained history to bound memory over long sessions
@@ -21,6 +23,9 @@ const periodStatus = document.getElementById("periodStatus");
 const cmdInput = document.getElementById("cmdInput");
 const rawResponses = document.getElementById("rawResponses");
 const jsonViewer = document.getElementById("jsonViewer");
+const logSection = document.getElementById("logSection");
+const updateToast = document.getElementById("updateToast");
+const updateButton = document.getElementById("updateBtn");
 
 // Classic BLE 4.0 ATT MTU (23 bytes) minus the 3-byte header, matching the HM-10's default link budget
 const MAX_BLE_WRITE_CHUNK_BYTES = 20;
@@ -66,6 +71,75 @@ window.addEventListener("DOMContentLoaded", () => {
   console.log("Chart.js initialized");
 });
 
+function showUpdateBanner(message = "A new version is available") {
+  if (!updateToast) return;
+  const messageNode = updateToast.querySelector(".update-toast__message");
+  if (messageNode) {
+    messageNode.textContent = message;
+  }
+  updateToast.hidden = false;
+}
+
+function hideUpdateBanner() {
+  if (!updateToast) return;
+  updateToast.hidden = true;
+}
+
+function initServiceWorkerUpdates() {
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (isRefreshing) return;
+    isRefreshing = true;
+    window.location.reload();
+  });
+
+  navigator.serviceWorker
+    .register("./sw.js")
+    .then((registration) => {
+      serviceWorkerRegistration = registration;
+      console.log("PWA Service Worker Active:", registration.scope);
+
+      if (registration.waiting) {
+        showUpdateBanner();
+      }
+
+      registration.addEventListener("updatefound", () => {
+        const newWorker = registration.installing;
+        if (!newWorker) return;
+
+        newWorker.addEventListener("statechange", () => {
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            showUpdateBanner();
+          }
+        });
+      });
+
+      registration.update().catch((error) => {
+        console.warn("Service worker update check failed:", error);
+      });
+    })
+    .catch((error) => {
+      console.error("PWA Service Worker failed:", error);
+    });
+
+  if (updateButton) {
+    updateButton.addEventListener("click", () => {
+      if (!serviceWorkerRegistration || !serviceWorkerRegistration.waiting) {
+        hideUpdateBanner();
+        return;
+      }
+
+      serviceWorkerRegistration.waiting.postMessage({ type: "SKIP_WAITING" });
+      showUpdateBanner("Applying update...");
+    });
+  }
+}
+
+window.addEventListener("load", initServiceWorkerUpdates);
+
 async function connectBLE() {
   try {
     // Check if Web Bluetooth API is available
@@ -105,6 +179,9 @@ async function connectBLE() {
     connectBtn.style.display = "none";
     disconnectBtn.style.display = "block";
     controlPanel.style.display = "block";
+    if (logSection) {
+      logSection.style.display = "block";
+    }
 
     // Ask the firmware for its current config, including the live sample period,
     // so the input reflects reality rather than a guessed default.
@@ -334,6 +411,9 @@ function onDisconnected() {
   connectBtn.style.display = "block";
   disconnectBtn.style.display = "none";
   controlPanel.style.display = "none";
+  if (logSection) {
+    logSection.style.display = "none";
+  }
   periodStatus.innerText = "";
   byteBuffer = [];
 }
