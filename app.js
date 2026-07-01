@@ -18,6 +18,9 @@ const chartInner = document.getElementById("chartInner");
 const controlPanel = document.getElementById("controlPanel");
 const periodInput = document.getElementById("periodInput");
 const periodStatus = document.getElementById("periodStatus");
+const cmdInput = document.getElementById("cmdInput");
+const rawResponses = document.getElementById("rawResponses");
+const jsonViewer = document.getElementById("jsonViewer");
 
 // Classic BLE 4.0 ATT MTU (23 bytes) minus the 3-byte header, matching the HM-10's default link budget
 const MAX_BLE_WRITE_CHUNK_BYTES = 20;
@@ -160,7 +163,21 @@ function handleDeviceResponse(line) {
     response = JSON.parse(line);
   } catch (error) {
     console.warn("Could not parse device response:", line);
+    // Still log raw response for debugging
+    if (rawResponses) rawResponses.innerText += `In <- ${line}\n`;
+    if (jsonViewer) jsonViewer.innerText = line;
     return;
+  }
+
+  // Log parsed response in the response log area
+  if (rawResponses)
+    rawResponses.innerText += `In <- ${JSON.stringify(response)}\n`;
+  if (jsonViewer) {
+    try {
+      jsonViewer.innerText = JSON.stringify(response, null, 2);
+    } catch (e) {
+      jsonViewer.innerText = String(response);
+    }
   }
 
   if (typeof response.period_ms === "number") {
@@ -168,9 +185,56 @@ function handleDeviceResponse(line) {
   }
   if (response.msg) {
     periodStatus.innerText = response.msg;
-  } else if (response.status === "ok" && typeof response.period_ms === "number") {
+  } else if (
+    response.status === "ok" &&
+    typeof response.period_ms === "number"
+  ) {
     periodStatus.innerText = `Current period: ${response.period_ms / 1000}s`;
   }
+}
+
+function appendResponseLog(text) {
+  if (!rawResponses) return;
+  rawResponses.innerText += text + "\n";
+  // keep most recent visible
+  rawResponses.scrollTop = rawResponses.scrollHeight;
+}
+
+function clearResponseLog() {
+  if (rawResponses) rawResponses.innerText = "";
+  if (jsonViewer) jsonViewer.innerText = "";
+  periodStatus.innerText = "";
+}
+
+async function sendGetConfig() {
+  periodStatus.innerText = "Sending get_config...";
+  appendResponseLog('Out -> {"cmd":"get_config"}');
+  await sendBleCommand({ cmd: "get_config" });
+}
+
+async function sendCustomCommand() {
+  if (!cmdInput) return;
+  const raw = cmdInput.value.trim();
+  if (!raw) {
+    periodStatus.innerText = "Enter a command";
+    return;
+  }
+
+  let obj;
+  if (raw.startsWith("{")) {
+    try {
+      obj = JSON.parse(raw);
+    } catch (err) {
+      periodStatus.innerText = "Invalid JSON";
+      return;
+    }
+  } else {
+    obj = { cmd: raw };
+  }
+
+  periodStatus.innerText = "Sending...";
+  appendResponseLog(`Out -> ${JSON.stringify(obj)}`);
+  await sendBleCommand(obj);
 }
 
 // Write a JSON command to the HM-10's transparent UART characteristic, chunked to the BLE write limit.
@@ -184,7 +248,11 @@ async function sendBleCommand(commandObj) {
   const bytes = new TextEncoder().encode(payload);
 
   try {
-    for (let offset = 0; offset < bytes.length; offset += MAX_BLE_WRITE_CHUNK_BYTES) {
+    for (
+      let offset = 0;
+      offset < bytes.length;
+      offset += MAX_BLE_WRITE_CHUNK_BYTES
+    ) {
       const chunk = bytes.slice(offset, offset + MAX_BLE_WRITE_CHUNK_BYTES);
       if (rxCharacteristic.properties.writeWithoutResponse) {
         await rxCharacteristic.writeValueWithoutResponse(chunk);

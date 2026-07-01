@@ -47,6 +47,50 @@
           </button>
         </div>
         <div id="periodStatus" class="period-status"></div>
+
+        <div class="label">Send Command</div>
+        <div class="period-control">
+          <input
+            type="text"
+            id="cmdInput"
+            placeholder='{"cmd":"get_config"} or get_config'
+          />
+          <button id="sendCmdBtn" class="btn" onclick="sendCustomCommand()">
+            Send
+          </button>
+          <button id="quickGetBtn" class="btn" onclick="sendGetConfig()">
+            Quick get_config
+          </button>
+          <button
+            id="clearLogBtn"
+            class="btn"
+            onclick="clearResponseLog()"
+            style="background: #6c757d; margin-left: 8px"
+          >
+            Clear Log
+          </button>
+        </div>
+        <div
+          id="rawResponses"
+          class="period-status"
+          style="
+            white-space: pre-wrap;
+            text-align: left;
+            max-height: 120px;
+            overflow: auto;
+          "
+        ></div>
+        <div class="label">JSON Viewer</div>
+        <pre
+          id="jsonViewer"
+          class="period-status"
+          style="
+            white-space: pre-wrap;
+            text-align: left;
+            max-height: 200px;
+            overflow: auto;
+          "
+        ></pre>
       </div>
 
       <!-- Real-Time Time Series Data Chart Window -->
