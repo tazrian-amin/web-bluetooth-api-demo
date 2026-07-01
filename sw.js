@@ -1,4 +1,5 @@
-const CACHE_NAME = "ms-connect-v5";
+const CACHE_VERSION = "v6";
+const CACHE_NAME = `ms-connect-${CACHE_VERSION}`;
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -13,7 +14,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log("PWA Service Worker: Caching core assets (v5)");
+      console.log(`PWA Service Worker: Caching core assets (${CACHE_VERSION})`);
       return cache.addAll(ASSETS_TO_CACHE);
     }),
   );
@@ -52,9 +53,14 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
-// Allow the page to trigger the waiting service worker to take over immediately.
+// Allow the page to trigger the waiting service worker to take over immediately,
+// and to ask the active worker which version it's serving.
 self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SKIP_WAITING") {
+  if (!event.data) return;
+
+  if (event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
+  } else if (event.data.type === "GET_VERSION") {
+    event.source.postMessage({ type: "VERSION", version: CACHE_VERSION });
   }
 });

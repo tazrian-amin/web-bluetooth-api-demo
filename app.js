@@ -26,6 +26,7 @@ const jsonViewer = document.getElementById("jsonViewer");
 const logSection = document.getElementById("logSection");
 const updateToast = document.getElementById("updateToast");
 const updateButton = document.getElementById("updateBtn");
+const appVersionText = document.getElementById("appVersion");
 
 // Classic BLE 4.0 ATT MTU (23 bytes) minus the 3-byte header, matching the HM-10's default link budget
 const MAX_BLE_WRITE_CHUNK_BYTES = 20;
@@ -111,7 +112,10 @@ function initServiceWorkerUpdates() {
         if (!newWorker) return;
 
         newWorker.addEventListener("statechange", () => {
-          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+          if (
+            newWorker.state === "installed" &&
+            navigator.serviceWorker.controller
+          ) {
             showUpdateBanner();
           }
         });
@@ -120,6 +124,8 @@ function initServiceWorkerUpdates() {
       registration.update().catch((error) => {
         console.warn("Service worker update check failed:", error);
       });
+
+      requestAppVersion();
     })
     .catch((error) => {
       console.error("PWA Service Worker failed:", error);
@@ -132,10 +138,35 @@ function initServiceWorkerUpdates() {
         return;
       }
 
-      serviceWorkerRegistration.waiting.postMessage({ type: "SKIP_WAITING" });
+      updateButton.disabled = true;
       showUpdateBanner("Applying update...");
+      serviceWorkerRegistration.waiting.postMessage({ type: "SKIP_WAITING" });
+
+      // Safety net: "controllerchange" should fire almost immediately once the
+      // new worker claims this page, but if the waiting worker was evicted or
+      // the event never arrives, force the reload anyway so the banner never
+      // gets stuck on "Applying update...".
+      setTimeout(() => {
+        if (!isRefreshing) {
+          isRefreshing = true;
+          window.location.reload();
+        }
+      }, 3000);
     });
   }
+
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if (event.data && event.data.type === "VERSION" && appVersionText) {
+      appVersionText.textContent = event.data.version;
+    }
+  });
+}
+
+function requestAppVersion() {
+  if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller) {
+    return;
+  }
+  navigator.serviceWorker.controller.postMessage({ type: "GET_VERSION" });
 }
 
 window.addEventListener("load", initServiceWorkerUpdates);
@@ -416,13 +447,4 @@ function onDisconnected() {
   }
   periodStatus.innerText = "";
   byteBuffer = [];
-}
-
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("./sw.js")
-      .then((reg) => console.log("PWA Service Worker Active:", reg.scope))
-      .catch((err) => console.error("PWA Service Worker failed:", err));
-  });
 }
